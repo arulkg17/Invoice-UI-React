@@ -6,6 +6,7 @@ interface AuthState{
     loading:boolean;
     isAuthenticated:boolean;
     token:string|null;
+    user:string|null;
     expiration:string|null;
     error:string|null;
 }
@@ -13,6 +14,7 @@ interface AuthState{
 const initialState:AuthState = {
     loading:false,
     isAuthenticated:false,
+    user:null,
     token:null,
     expiration:null,
     error:null
@@ -26,9 +28,12 @@ const authSlice=createSlice({
             removeToken();
             state.loading=false;
             state.isAuthenticated=false;
+            state.user = null;
             state.token=null;
             state.expiration=null;
             state.error=null;
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
         }
     },
     extraReducers:(builder)=>{
