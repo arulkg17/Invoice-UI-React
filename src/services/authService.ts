@@ -1,10 +1,10 @@
-import api from '../api/axios';
+import api from '../api/axiosClient';
 import type {LoginRequest, LoginResponse} from '../models';
 
 class AuthService {
     async login(data: LoginRequest): Promise<LoginResponse> {
         const response = await api.post<LoginResponse>(
-            "http://localhost:5269/api/v1/Login/Login",
+            "/v1/Login/Login",
             data
         );
         return response.data;

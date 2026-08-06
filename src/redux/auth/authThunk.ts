@@ -2,41 +2,26 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 
 import authService from "../../services/authService";
 
-import type {
-    LoginRequest,
-    LoginResponse
-} from "../../models";
+import type { LoginRequest, LoginResponse } from "../../models";
 
-export const loginUser =
-createAsyncThunk<
-LoginResponse,
-LoginRequest,
-{
-    rejectValue:string;
-}
+export const loginUser = createAsyncThunk<
+  LoginResponse,
+  LoginRequest,
+  {
+    rejectValue: string;
+  }
 >(
-"auth/login",
+  "auth/login",
 
-async(request,{rejectWithValue})=>{
+  async (request, { rejectWithValue }) => {
+    try {
+      const response = await authService.login(request);
 
-    try{
-
-        const response =
-        await authService.login(request);
-
-        return response;
-
+      return response;
+    } catch (error: any) {
+      return rejectWithValue(
+        error.response?.data?.message ?? "Invalid username or password.",
+      );
     }
-    catch(error:any){
-
-        return rejectWithValue(
-
-            error.response?.data?.message ??
-
-            "Invalid username or password."
-
-        );
-
-    }
-
-});
+  },
+);
