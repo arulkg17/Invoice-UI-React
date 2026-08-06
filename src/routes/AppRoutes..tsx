@@ -3,7 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import Login from "../pages/login/Login";
 import Dashboard from "../pages/dashboard/Dashboard";
 import Logout from "../pages/logout/Logout";
-
+import MainLayout from "../layout/MainLayout";
 import ProtectedRoute from "./ProtectedRoute";
 
 export default function AppRoutes() {
@@ -16,7 +16,9 @@ export default function AppRoutes() {
 
       {/* Protected Routes */}
       <Route element={<ProtectedRoute />}>
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route element={<MainLayout />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+        </Route>
       </Route>
 
       {/* Logout */}
