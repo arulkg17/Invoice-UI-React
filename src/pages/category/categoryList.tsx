@@ -4,7 +4,7 @@ import {
   CircularProgress,
   IconButton,
   Paper,
-  TextField,
+  Stack,
   Table,
   TableBody,
   TableCell,
@@ -12,8 +12,10 @@ import {
   TableHead,
   TablePagination,
   TableRow,
-  Stack,
+  TextField,
+  Typography,
 } from "@mui/material";
+
 import { Edit, Delete, Search, Clear } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
@@ -56,6 +58,16 @@ const CategoryList = () => {
   useEffect(() => {
     loadCategories();
   }, []);
+
+  useEffect(() => {
+    if (!loading && categories.length === 0) {
+      setSnackbar({
+        open: true,
+        message: "No records found",
+        severity: "info",
+      });
+    }
+  }, [categories, loading]);
 
   const handleSearch = () => {
     setPage(0);
@@ -145,6 +157,16 @@ const CategoryList = () => {
 
   return (
     <Paper sx={{ padding: 3 }}>
+      <Typography
+        variant="h5"
+        sx={{
+          fontWeight: "bold",
+          mb: 2,
+          color: "primary.main",
+        }}
+      >
+        Category List
+      </Typography>
       <Button
         variant="contained"
         sx={{ mb: 2 }}
@@ -186,7 +208,13 @@ const CategoryList = () => {
       <TableContainer>
         <Table>
           <TableHead>
-            <TableRow>
+            <TableRow
+              sx={{
+                "& th": {
+                  fontWeight: "bold",
+                },
+              }}
+            >
               <TableCell>Code</TableCell>
               <TableCell>Name</TableCell>
               <TableCell>Description</TableCell>

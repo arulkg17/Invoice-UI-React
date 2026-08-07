@@ -5,20 +5,17 @@ import {
   FormControlLabel,
   Checkbox,
 } from "@mui/material";
-
 import { useEffect, useState } from "react";
-
 import { useNavigate, useParams } from "react-router-dom";
-
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
-
 import {
   createCategory,
   updateCategory,
   fetchCategoryById,
 } from "../../redux/category/categoryThunk";
-
+import { clearSelectedCategory } from "../../redux/category/categorySlice";
 import type { Category } from "../../models";
+import SnackbarAlert from "../../components/common/SnackbarAlert";
 
 const CategoryForm = () => {
   const dispatch = useAppDispatch();
@@ -33,15 +30,30 @@ const CategoryForm = () => {
     description: "",
     isActive: true,
   });
-
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success" as "success" | "error" | "warning" | "info",
+  });
   useEffect(() => {
     if (id) {
       dispatch(fetchCategoryById(Number(id)));
+    } else {
+      // Add mode
+      dispatch(clearSelectedCategory());
+      setCategory({
+        id: 0,
+        code: "",
+        name: "",
+        description: "",
+        isActive: true,
+      });
+      setErrors({});
     }
   }, [id, dispatch]);
 
   useEffect(() => {
-    if (selectedCategory) {
+    if (id && selectedCategory) {
       setCategory(selectedCategory);
     }
   }, [selectedCategory]);
@@ -82,18 +94,48 @@ const CategoryForm = () => {
     }
 
     if (id) {
-      dispatch(
-        updateCategory({
-          id: Number(id),
+      dispatch(updateCategory(category))
+        .unwrap()
+        .then(() => {
+          setSnackbar({
+            open: true,
+            message: "Category updated successfully",
+            severity: "success",
+          });
 
-          category,
-        }),
-      );
+          setTimeout(() => {
+            navigate("/category");
+          }, 1500);
+        })
+        .catch(() => {
+          setSnackbar({
+            open: true,
+            message: "Unable to update category",
+            severity: "error",
+          });
+        });
     } else {
-      dispatch(createCategory(category));
-    }
+      dispatch(createCategory(category))
+        .unwrap()
+        .then(() => {
+          setSnackbar({
+            open: true,
+            message: "Category created successfully",
+            severity: "success",
+          });
 
-    navigate("/category");
+          setTimeout(() => {
+            navigate("/category");
+          }, 1500);
+        })
+        .catch(() => {
+          setSnackbar({
+            open: true,
+            message: "Unable to create category",
+            severity: "error",
+          });
+        });
+    }
   };
 
   const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
@@ -107,7 +149,7 @@ const CategoryForm = () => {
         label="Code"
         name="code"
         value={category.code}
-        onChange={handleChange} 
+        onChange={handleChange}
         onFocus={handleFocus}
         error={!!errors.code}
         helperText={errors.code}
@@ -183,6 +225,17 @@ const CategoryForm = () => {
       >
         Cancel
       </Button>
+      <SnackbarAlert
+        open={snackbar.open}
+        message={snackbar.message}
+        severity={snackbar.severity}
+        onClose={() =>
+          setSnackbar({
+            ...snackbar,
+            open: false,
+          })
+        }
+      />
     </Paper>
   );
 };
