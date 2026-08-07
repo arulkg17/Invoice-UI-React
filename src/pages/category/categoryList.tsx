@@ -1,21 +1,27 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import {
   Button,
   CircularProgress,
   IconButton,
   Paper,
+  TextField,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
+  TablePagination,
   TableRow,
+  Stack,
 } from "@mui/material";
 
-import { Edit, Delete } from "@mui/icons-material";
+import { Edit, Delete, Search, Clear } from "@mui/icons-material";
+
 import { useNavigate } from "react-router-dom";
+
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
+
 import {
   fetchCategories,
   deleteCategory,
@@ -26,49 +32,155 @@ const CategoryList = () => {
 
   const navigate = useNavigate();
 
-  const { categories, loading, error } = useAppSelector(
+  const { categories, loading, error, totalRecords } = useAppSelector(
     (state) => state.category,
   );
 
-  useEffect(() => {
+  const [code, setCode] = useState("");
+
+  const [name, setName] = useState("");
+
+  const [page, setPage] = useState(0);
+
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  const loadCategories = () => {
     dispatch(
       fetchCategories({
-        pageNumber: 1,
-        pageSize: 10,
+        code,
+
+        name,
+
+        pageNumber: page + 1,
+
+        pageSize: rowsPerPage,
       }),
     );
-  }, [dispatch]);
+  };
+
+  useEffect(() => {
+    loadCategories();
+  }, []);
+
+  const handleSearch = () => {
+    setPage(0);
+
+    dispatch(
+      fetchCategories({
+        code,
+
+        name,
+
+        pageNumber: 1,
+
+        pageSize: rowsPerPage,
+      }),
+    );
+  };
+
+  const handleClear = () => {
+    setCode("");
+
+    setName("");
+
+    setPage(0);
+
+    dispatch(
+      fetchCategories({
+        code: "",
+
+        name: "",
+
+        pageNumber: 1,
+
+        pageSize: rowsPerPage,
+      }),
+    );
+  };
+
+  const handleChangePage = (_event: unknown, newPage: number) => {
+    setPage(newPage);
+
+    dispatch(
+      fetchCategories({
+        code,
+
+        name,
+
+        pageNumber: newPage + 1,
+
+        pageSize: rowsPerPage,
+      }),
+    );
+  };
+
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const size = parseInt(event.target.value, 10);
+
+    setRowsPerPage(size);
+
+    setPage(0);
+
+    dispatch(
+      fetchCategories({
+        code,
+
+        name,
+
+        pageNumber: 1,
+
+        pageSize: size,
+      }),
+    );
+  };
 
   const handleDelete = (id: number) => {
-    if (window.confirm("Are you sure you want to delete this category?")) {
+    if (window.confirm("Are you sure you want to delete?")) {
       dispatch(deleteCategory(id))
         .unwrap()
         .then(() => {
-          dispatch(
-            fetchCategories({
-              pageNumber: 1,
-              pageSize: 10,
-            }),
-          );
+          loadCategories();
         });
     }
   };
 
   return (
-    <Paper
-      sx={{
-        padding: 3,
-      }}
-    >
+    <Paper sx={{ padding: 3 }}>
       <Button
         variant="contained"
+        sx={{ mb: 2 }}
         onClick={() => navigate("/category/create")}
-        sx={{
-          mb: 2,
-        }}
       >
         Add Category
       </Button>
+
+      <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
+        <TextField
+          label="Code"
+          value={code}
+          onChange={(e) => setCode(e.target.value)}
+        />
+
+        <TextField
+          label="Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+
+        <Button
+          variant="contained"
+          startIcon={<Search />}
+          onClick={handleSearch}
+        >
+          Search
+        </Button>
+
+        <Button variant="outlined" startIcon={<Clear />} onClick={handleClear}>
+          Clear
+        </Button>
+      </Stack>
 
       {loading && <CircularProgress />}
 
@@ -117,6 +229,15 @@ const CategoryList = () => {
           </TableBody>
         </Table>
       </TableContainer>
+
+      <TablePagination
+        component="div"
+        count={totalRecords}
+        page={page}
+        rowsPerPage={rowsPerPage}
+        onPageChange={handleChangePage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+      />
     </Paper>
   );
 };

@@ -1,24 +1,16 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import categoryService from '../../services/categoryService';
-import type { Category } from '../../models';
+import type { Category, CategoryFilter } from '../../models';
 
 export const fetchCategories = createAsyncThunk(
     "category/fetchCategories",
     async (
-        params: {
-            code?:string,
-            name?:string,
-            pageNumber?:number,
-            pageSize?:number
-        },
+       filter:CategoryFilter,
         { rejectWithValue }
     ) =>{
         try{
             const response = await categoryService.getAllPaged(
-                params.code,
-                params.name,
-                params.pageNumber,
-                params.pageSize
+               filter
             );
             if(!response.success)
             {

@@ -2,11 +2,11 @@ import {
   Button,
   Paper,
   TextField,
-  Checkbox,
   FormControlLabel,
+  Checkbox,
 } from "@mui/material";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -22,34 +22,23 @@ import type { Category } from "../../models";
 
 const CategoryForm = () => {
   const dispatch = useAppDispatch();
-
   const navigate = useNavigate();
-
   const { id } = useParams();
-
   const { selectedCategory } = useAppSelector((state) => state.category);
-
+  const [errors, setErrors] = useState<any>({});
   const [category, setCategory] = useState<Category>({
     id: 0,
-
     code: "",
-
     name: "",
-
     description: "",
-
     isActive: true,
   });
-
-  // Load existing category for Edit
 
   useEffect(() => {
     if (id) {
       dispatch(fetchCategoryById(Number(id)));
     }
   }, [id, dispatch]);
-
-  // Populate form after API response
 
   useEffect(() => {
     if (selectedCategory) {
@@ -65,9 +54,35 @@ const CategoryForm = () => {
     });
   };
 
-  const handleSubmit = async () => {
+  const validate = () => {
+    let temp: any = {};
+
+    if (!category.code) {
+      temp.code = "Code is required";
+    } else if (category.code.length > 5) {
+      temp.code = "Code can not exceed 5 characters";
+    }
+
+    if (!category.name) {
+      temp.name = "Name is required";
+    } else if (category.name.length > 25) {
+      temp.name = "Name can not exceed 25 characters";
+    }
+    if (category.description && category.description.length > 100) {
+      temp.description = "Description can not exceed 100 charaacters";
+    }
+    setErrors(temp);
+
+    return Object.keys(temp).length === 0;
+  };
+
+  const handleSubmit = () => {
+    if (!validate()) {
+      return;
+    }
+
     if (id) {
-      await dispatch(
+      dispatch(
         updateCategory({
           id: Number(id),
 
@@ -75,27 +90,33 @@ const CategoryForm = () => {
         }),
       );
     } else {
-      await dispatch(createCategory(category));
+      dispatch(createCategory(category));
     }
 
     navigate("/category");
   };
 
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    e.target.select();
+  };
+
   return (
-    <Paper
-      sx={{
-        padding: 3,
-      }}
-    >
+    <Paper sx={{ padding: 3 }}>
       <TextField
         fullWidth
         label="Code"
         name="code"
         value={category.code}
-        onChange={handleChange}
-        sx={{
-          mb: 2,
+        onChange={handleChange} 
+        onFocus={handleFocus}
+        error={!!errors.code}
+        helperText={errors.code}
+        slotProps={{
+          htmlInput: {
+            maxLength: 5,
+          },
         }}
+        sx={{ mb: 2 }}
       />
 
       <TextField
@@ -104,9 +125,15 @@ const CategoryForm = () => {
         name="name"
         value={category.name}
         onChange={handleChange}
-        sx={{
-          mb: 2,
+        onFocus={handleFocus}
+        error={!!errors.name}
+        helperText={errors.name}
+        slotProps={{
+          htmlInput: {
+            maxLength: 25,
+          },
         }}
+        sx={{ mb: 2 }}
       />
 
       <TextField
@@ -115,9 +142,15 @@ const CategoryForm = () => {
         name="description"
         value={category.description ?? ""}
         onChange={handleChange}
-        sx={{
-          mb: 2,
+        onFocus={handleFocus}
+        error={!!errors.description}
+        helperText={errors.description}
+        slotProps={{
+          htmlInput: {
+            maxLength: 100,
+          },
         }}
+        sx={{ mb: 2 }}
       />
 
       <FormControlLabel
@@ -137,16 +170,15 @@ const CategoryForm = () => {
       />
 
       <br />
+      <br />
 
       <Button variant="contained" onClick={handleSubmit}>
         Save
       </Button>
 
       <Button
+        sx={{ ml: 2 }}
         variant="outlined"
-        sx={{
-          ml: 2,
-        }}
         onClick={() => navigate("/category")}
       >
         Cancel
