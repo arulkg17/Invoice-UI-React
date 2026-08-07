@@ -1,21 +1,18 @@
 import api from "../api/axiosClient";
-import type { ApiResponse, Category } from "../models";
+import type { ApiResponse, Category, CategoryFilter } from "../models";
 
 class CategoryService {
   async getAllPaged(
-    code?: string,
-    name?: string,
-    pageNumber: number = 1,
-    pageSize: number = 10,
+    filter:CategoryFilter
   ): Promise<ApiResponse<Category[]>> {
     const response = await api.get<ApiResponse<Category[]>>(
       "/v1/Category/GetAllPaged",
       {
         params: {
-          code,
-          name,
-          pageNumber,
-          pageSize,
+          code:filter.code,
+          name:filter.name,
+          pageNumber:filter.pageNumber,
+          pageSize:filter.pageSize,
         },
       },
     );
