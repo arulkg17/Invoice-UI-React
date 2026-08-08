@@ -41,6 +41,7 @@ const categorySlice = createSlice({
     builder.addCase(
         fetchCategories.fulfilled,
         (state, action)=>{
+             console.log("CATEGORY API PAYLOAD:", action.payload);
             state.loading=false;
             state.categories=action.payload.data;
             state.totalRecords = action.payload.totalRecords;

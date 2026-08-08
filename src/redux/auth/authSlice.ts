@@ -1,12 +1,13 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { loginUser } from "./authThunk";
 import { saveToken, removeToken } from "../../utils/tokenStorage";
+import type { User } from "../../models/user";
 
 interface AuthState{
     loading:boolean;
     isAuthenticated:boolean;
     token:string|null;
-    user:string|null;
+    user: User|null;
     expiration:string|null;
     error:string|null;
 }
@@ -14,7 +15,7 @@ interface AuthState{
 const initialState:AuthState = {
     loading:false,
     isAuthenticated:false,
-    user:null,
+    user: null,
     token:null,
     expiration:null,
     error:null
@@ -50,7 +51,12 @@ const authSlice=createSlice({
                 state.isAuthenticated=true;
                 state.token=action.payload.token;
                 state.expiration = action.payload.expiration;
+                state.user = action.payload.user;
                 saveToken(action.payload.token);
+                localStorage.setItem(
+                    "user",
+                   JSON.stringify(action.payload.user)
+                );
             }
         )
         builder.addCase(

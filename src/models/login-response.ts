@@ -1,4 +1,7 @@
-export interface LoginResponse{
-    token:string;
-    expiration:string;
+import type { User } from "./user";
+
+export interface LoginResponse {
+  token: string;
+  expiration: string;
+  user: User;
 }
