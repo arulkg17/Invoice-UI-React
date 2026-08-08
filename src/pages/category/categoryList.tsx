@@ -18,32 +18,53 @@ import {
 
 import { Edit, Delete, Search, Clear } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
+
 import { useAppDispatch, useAppSelector } from "../../redux/hooks";
+
 import {
   fetchCategories,
   deleteCategory,
 } from "../../redux/category/categoryThunk";
+
 import SnackbarAlert from "../../components/common/SnackbarAlert";
 import ConfirmDialog from "../../components/common/ConfirmDialog";
+import Header from "../../layout/Header";
 
 const CategoryList = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { categories, loading, error, totalRecords } = useAppSelector(
-    (state) => state.category,
-  );
+
+  const {
+    categories,
+    loading,
+    error,
+    totalRecords,
+  } = useAppSelector((state) => state.category);
+
   const [code, setCode] = useState("");
   const [name, setName] = useState("");
+
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
-    severity: "success" as "success" | "error" | "info" | "warning",
+    severity: "success" as
+      | "success"
+      | "error"
+      | "info"
+      | "warning",
   });
-  const [deleteOpen, setDeleteOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<any>(null);
 
+  const [deleteOpen, setDeleteOpen] = useState(false);
+
+  const [selectedCategory, setSelectedCategory] =
+    useState<any>(null);
+
+  /*
+   * Load categories
+   */
   const loadCategories = () => {
     dispatch(
       fetchCategories({
@@ -51,51 +72,72 @@ const CategoryList = () => {
         name,
         pageNumber: page + 1,
         pageSize: rowsPerPage,
-      }),
+      })
     );
   };
 
+  /*
+   * Initial load
+   */
   useEffect(() => {
     loadCategories();
   }, []);
 
+  /*
+   * Show "No records found" only after loading
+   * has completed and the API returned zero records.
+   */
   useEffect(() => {
-    if (!loading && categories.length === 0) {
+    if (!loading && totalRecords === 0) {
       setSnackbar({
         open: true,
         message: "No records found",
         severity: "info",
       });
     }
-  }, [categories, loading]);
+  }, [loading, totalRecords]);
 
+  /*
+   * Search
+   */
   const handleSearch = () => {
     setPage(0);
+
     dispatch(
       fetchCategories({
         code,
         name,
         pageNumber: 1,
         pageSize: rowsPerPage,
-      }),
+      })
     );
   };
 
+  /*
+   * Clear search
+   */
   const handleClear = () => {
     setCode("");
     setName("");
     setPage(0);
+
     dispatch(
       fetchCategories({
         code: "",
         name: "",
         pageNumber: 1,
         pageSize: rowsPerPage,
-      }),
+      })
     );
   };
 
-  const handleChangePage = (_event: unknown, newPage: number) => {
+  /*
+   * Page change
+   */
+  const handleChangePage = (
+    _event: unknown,
+    newPage: number
+  ) => {
     setPage(newPage);
 
     dispatch(
@@ -104,34 +146,47 @@ const CategoryList = () => {
         name,
         pageNumber: newPage + 1,
         pageSize: rowsPerPage,
-      }),
+      })
     );
   };
 
+  /*
+   * Rows per page change
+   */
   const handleChangeRowsPerPage = (
-    event: React.ChangeEvent<HTMLInputElement>,
+    event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const size = parseInt(event.target.value, 10);
+
     setRowsPerPage(size);
     setPage(0);
+
     dispatch(
       fetchCategories({
         code,
         name,
         pageNumber: 1,
         pageSize: size,
-      }),
+      })
     );
   };
 
+  /*
+   * Delete button
+   */
   const handleDeleteClick = (category: any) => {
     setSelectedCategory(category);
-
     setDeleteOpen(true);
   };
 
+  /*
+   * Confirm delete
+   */
   const confirmDelete = () => {
-    if (!selectedCategory) return;
+    if (!selectedCategory) {
+      return;
+    }
+
     dispatch(deleteCategory(selectedCategory.id))
       .unwrap()
       .then(() => {
@@ -156,7 +211,8 @@ const CategoryList = () => {
   };
 
   return (
-    <Paper sx={{ padding: 3 }}>
+    <Paper sx={{ p: 3 }}>
+      {/* Page Title */}
       <Typography
         variant="h5"
         sx={{
@@ -167,6 +223,8 @@ const CategoryList = () => {
       >
         Category List
       </Typography>
+
+      {/* Add Category */}
       <Button
         variant="contained"
         sx={{ mb: 2 }}
@@ -175,7 +233,12 @@ const CategoryList = () => {
         Add Category
       </Button>
 
-      <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
+      {/* Search Area */}
+      <Stack
+        direction="row"
+        spacing={2}
+        sx={{ mb: 3 }}
+      >
         <TextField
           label="Code"
           value={code}
@@ -196,15 +259,36 @@ const CategoryList = () => {
           Search
         </Button>
 
-        <Button variant="outlined" startIcon={<Clear />} onClick={handleClear}>
+        <Button
+          variant="outlined"
+          startIcon={<Clear />}
+          onClick={handleClear}
+        >
           Clear
         </Button>
       </Stack>
 
-      {loading && <CircularProgress />}
+      {/* Loading */}
+      {loading && (
+        <Stack
+          alignItems="center"
+          sx={{ mb: 2 }}
+        >
+          <CircularProgress />
+        </Stack>
+      )}
 
-      {error && <p>{error}</p>}
+      {/* Error */}
+      {error && (
+        <Typography
+          color="error"
+          sx={{ mb: 2 }}
+        >
+          {error}
+        </Typography>
+      )}
 
+      {/* Category Table */}
       <TableContainer>
         <Table>
           <TableHead>
@@ -226,18 +310,40 @@ const CategoryList = () => {
           <TableBody>
             {categories.map((category) => (
               <TableRow key={category.id}>
-                <TableCell>{category.code}</TableCell>
-                <TableCell>{category.name}</TableCell>
-                <TableCell>{category.description}</TableCell>
-                <TableCell>{category.isActive ? "Yes" : "No"}</TableCell>
                 <TableCell>
+                  {category.code}
+                </TableCell>
+
+                <TableCell>
+                  {category.name}
+                </TableCell>
+
+                <TableCell>
+                  {category.description}
+                </TableCell>
+
+                <TableCell>
+                  {category.isActive ? "Yes" : "No"}
+                </TableCell>
+
+                <TableCell>
+                  {/* Edit */}
                   <IconButton
-                    onClick={() => navigate(`/category/edit/${category.id}`)}
+                    onClick={() =>
+                      navigate(
+                        `/category/edit/${category.id}`
+                      )
+                    }
                   >
                     <Edit />
                   </IconButton>
 
-                  <IconButton onClick={() => handleDeleteClick(category)}>
+                  {/* Delete */}
+                  <IconButton
+                    onClick={() =>
+                      handleDeleteClick(category)
+                    }
+                  >
                     <Delete />
                   </IconButton>
                 </TableCell>
@@ -247,14 +353,20 @@ const CategoryList = () => {
         </Table>
       </TableContainer>
 
+      {/* Pagination */}
       <TablePagination
         component="div"
         count={totalRecords}
         page={page}
         rowsPerPage={rowsPerPage}
         onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
+        onRowsPerPageChange={
+          handleChangeRowsPerPage
+        }
+        rowsPerPageOptions={[5, 10, 25, 50]}
       />
+
+      {/* Snackbar */}
       <SnackbarAlert
         open={snackbar.open}
         message={snackbar.message}
@@ -266,18 +378,24 @@ const CategoryList = () => {
           })
         }
       />
+
+      {/* Delete Confirmation */}
       <ConfirmDialog
         open={deleteOpen}
         title="Delete Category"
-        itemName={selectedCategory?.name ?? ""}
+        itemName={
+          selectedCategory?.name ?? ""
+        }
         onCancel={() => {
           setDeleteOpen(false);
           setSelectedCategory(null);
         }}
         onConfirm={confirmDelete}
       />
+       <Header />
     </Paper>
   );
 };
 
 export default CategoryList;
+
