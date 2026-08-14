@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import {
+  Box,
   Button,
   CircularProgress,
   IconButton,
@@ -28,7 +29,6 @@ import {
 
 import SnackbarAlert from "../../components/common/SnackbarAlert";
 import ConfirmDialog from "../../components/common/ConfirmDialog";
-import Header from "../../layout/Header";
 
 const CategoryList = () => {
   const dispatch = useAppDispatch();
@@ -270,12 +270,15 @@ const CategoryList = () => {
 
       {/* Loading */}
       {loading && (
-        <Stack
-          alignItems="center"
-          sx={{ mb: 2 }}
-        >
+        <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              mb: 2,
+            }}
+          >
           <CircularProgress />
-        </Stack>
+        </Box>
       )}
 
       {/* Error */}
@@ -392,7 +395,6 @@ const CategoryList = () => {
         }}
         onConfirm={confirmDelete}
       />
-       <Header />
     </Paper>
   );
 };

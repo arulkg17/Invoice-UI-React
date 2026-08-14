@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import {
   AppBar,
   Toolbar,
-  Typography,
   Button,
   Menu,
   MenuItem,
@@ -38,13 +37,13 @@ export default function TopNavigation() {
   return (
     <AppBar position="static">
       <Toolbar>
-        <Typography variant="h6" sx={{ mr: 5 }}>
+        {/* <Typography variant="h6" sx={{ mr: 5 }}>
           Invoice Management
         </Typography>
 
         <Button color="inherit" onClick={() => navigate("/dashboard")}>
           Dashboard
-        </Button>
+        </Button> */}
 
         {/* MASTER */}
 
@@ -129,7 +128,7 @@ export default function TopNavigation() {
           endIcon={<KeyboardArrowDownIcon />}
           onClick={(e) => setUserAnchor(e.currentTarget)}
         >
-          Welcome Admin
+          Exit
         </Button>
 
         <Menu

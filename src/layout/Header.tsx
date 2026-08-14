@@ -64,7 +64,7 @@ const Header = () => {
             fontWeight: "bold",
           }}
         >
-          Invoice Management
+          Invoice Management Systems
         </Typography>
 
         {user && (
